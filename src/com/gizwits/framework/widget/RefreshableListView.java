@@ -36,7 +36,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 
 // TODO: Auto-generated Javadoc
 /**

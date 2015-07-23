@@ -31,7 +31,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 import com.xpg.common.device.DensityUtils;
 
 // TODO: Auto-generated Javadoc

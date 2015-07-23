@@ -27,7 +27,7 @@ import android.widget.TextView;
 
 import com.gizwits.framework.activity.BaseActivity;
 import com.gizwits.framework.utils.DialogManager;
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 import com.xpg.common.system.IntentUtils;
 import com.xpg.ui.utils.ToastUtils;
 

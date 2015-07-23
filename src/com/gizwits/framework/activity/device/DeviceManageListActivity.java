@@ -29,7 +29,7 @@ import android.widget.ListView;
 import com.gizwits.framework.activity.BaseActivity;
 import com.gizwits.framework.activity.onboarding.SearchDeviceActivity;
 import com.gizwits.framework.adapter.ManageListAdapter;
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 import com.xpg.common.system.IntentUtils;
 import com.xtremeprog.xpgconnect.XPGWifiDevice;
 

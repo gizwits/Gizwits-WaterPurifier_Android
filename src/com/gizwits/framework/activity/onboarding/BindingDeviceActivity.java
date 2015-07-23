@@ -29,7 +29,7 @@ import android.widget.TextView;
 
 import com.gizwits.framework.activity.BaseActivity;
 import com.gizwits.framework.activity.device.DeviceListActivity;
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 import com.xpg.common.system.IntentUtils;
 
 // TODO: Auto-generated Javadoc

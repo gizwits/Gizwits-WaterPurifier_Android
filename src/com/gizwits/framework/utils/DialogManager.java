@@ -32,7 +32,7 @@ import com.gizwits.framework.widget.ArrayWheelAdapter;
 import com.gizwits.framework.widget.NumericWheelAdapter;
 import com.gizwits.framework.widget.OnWheelChangedListener;
 import com.gizwits.framework.widget.WheelView;
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 
 // TODO: Auto-generated Javadoc
 /**

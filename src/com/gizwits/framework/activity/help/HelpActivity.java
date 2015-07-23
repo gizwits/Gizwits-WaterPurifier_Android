@@ -24,7 +24,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.gizwits.framework.activity.BaseActivity;
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 
 /**
  * 

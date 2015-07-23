@@ -381,60 +381,71 @@ public class CmdCenter {
 	}
 	
 	/**
-	 * C color.
+	 * C Mode.
 	 *
 	 * @param xpgWifiDevice the xpg wifi device
-	 * @param color
+	 * @param int mode
 	 */
-	public void cColor(XPGWifiDevice xpgWifiDevice, int color) {
-		try {
-			final JSONObject jsonsend = new JSONObject();
-			JSONObject jsonparam = new JSONObject();
-			jsonsend.put("cmd", 1);
-			jsonparam.put(JsonKeys.COLOR_RED, Color.red(color));
-			jsonparam.put(JsonKeys.COLOR_GREEN, Color.green(color));
-			jsonparam.put(JsonKeys.COLOR_BLUE, Color.blue(color));
-			jsonparam.put(JsonKeys.MODE, 0);
-			jsonsend.put(JsonKeys.KEY_ACTION, jsonparam);
-			Log.i("sendjson", jsonsend.toString());
-			xpgWifiDevice.write(jsonsend.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+	public void cSetMode(XPGWifiDevice xpgWifiDevice, int mode) {
+		cWrite(xpgWifiDevice, JsonKeys.Mode, mode);
 		cGetStatus(xpgWifiDevice);
 	}
 	
 	/**
-	 * C brightness.
+	 * C set life 1.
 	 *
 	 * @param xpgWifiDevice the xpg wifi device
-	 * @param isOn the is on
+	 * @param int life
 	 */
-	public void cColorTemp(XPGWifiDevice xpgWifiDevice, int num) {
-		try {
-			final JSONObject jsonsend = new JSONObject();
-			JSONObject jsonparam = new JSONObject();
-			jsonsend.put("cmd", 1);
-			jsonparam.put(JsonKeys.COLOR_TEMPERATURE, num);
-			jsonparam.put(JsonKeys.MODE, 1);
-			jsonsend.put(JsonKeys.KEY_ACTION, jsonparam);
-			Log.i("sendjson", jsonsend.toString());
-			xpgWifiDevice.write(jsonsend.toString());
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+	public void cSetLife1(XPGWifiDevice xpgWifiDevice, int life) {
+		cWrite(xpgWifiDevice, JsonKeys.Filter_1_Life, life);
 		cGetStatus(xpgWifiDevice);
 	}
 	
 	/**
-	 * C brightness.
+	 * C set life 2.
 	 *
 	 * @param xpgWifiDevice the xpg wifi device
-	 * @param isOn the is on
+	 * @param int life
 	 */
-	public void cBrightness(XPGWifiDevice xpgWifiDevice, int progress) {
-		cWrite(xpgWifiDevice, JsonKeys.BRIGHTNESS, progress);
+	public void cSetLife2(XPGWifiDevice xpgWifiDevice, int life) {
+		cWrite(xpgWifiDevice, JsonKeys.Filter_2_Life, life);
 		cGetStatus(xpgWifiDevice);
 	}
+	
+	/**
+	 * C set life 3.
+	 *
+	 * @param xpgWifiDevice the xpg wifi device
+	 * @param int life
+	 */
+	public void cSetLife3(XPGWifiDevice xpgWifiDevice, int life) {
+		cWrite(xpgWifiDevice, JsonKeys.Filter_3_Life, life);
+		cGetStatus(xpgWifiDevice);
+	}
+	
+	/**
+	 * C set life 4.
+	 *
+	 * @param xpgWifiDevice the xpg wifi device
+	 * @param int life
+	 */
+	public void cSetLife4(XPGWifiDevice xpgWifiDevice, int life) {
+		cWrite(xpgWifiDevice, JsonKeys.Filter_4_Life, life);
+		cGetStatus(xpgWifiDevice);
+	}
+	
+	/**
+	 * C set life 5.
+	 *
+	 * @param xpgWifiDevice the xpg wifi device
+	 * @param int life
+	 */
+	public void cSetLife5(XPGWifiDevice xpgWifiDevice, int life) {
+		cWrite(xpgWifiDevice, JsonKeys.Filter_5_Life, life);
+		cGetStatus(xpgWifiDevice);
+	}
+	
+	
 	
 }

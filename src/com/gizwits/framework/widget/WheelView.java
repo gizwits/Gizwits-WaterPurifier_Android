@@ -40,7 +40,7 @@ import android.view.View;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 
 // TODO: Auto-generated Javadoc
 /**

@@ -27,7 +27,7 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 
 import com.gizwits.framework.activity.BaseActivity;
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 
 // TODO: Auto-generated Javadoc
 //TODO: Auto-generated Javadoc

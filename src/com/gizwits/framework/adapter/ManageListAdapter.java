@@ -28,7 +28,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.gizwits.framework.utils.StringUtils;
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 import com.xtremeprog.xpgconnect.XPGWifiDevice;
 
 // TODO: Auto-generated Javadoc

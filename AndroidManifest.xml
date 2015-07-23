@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.gizwits.light"
+    package="com.gizwits.waterpurifier"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -59,7 +59,7 @@
         <activity android:name="com.gizwits.framework.activity.onboarding.SoftApConfigActivity" />
         <activity android:name="com.gizwits.framework.activity.help.AboutActivity" />
         <activity android:name="com.gizwits.framework.activity.help.HelpActivity" />
-        <activity android:name="com.gizwits.light.activity.control.MainControlActivity"
+        <activity android:name="com.gizwits.waterpurifier.activity.control.MainControlActivity"
             android:launchMode="singleTask" />
         <activity
             android:name="zxing.CaptureActivity"

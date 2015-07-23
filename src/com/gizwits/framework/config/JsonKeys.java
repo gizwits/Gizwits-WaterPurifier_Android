@@ -36,22 +36,21 @@ public class JsonKeys {
 	/** 开关. */
 	public final static String ON_OFF = "Switch";
 	
-	/** 亮度. */
-	public final static String BRIGHTNESS = "Brightness";
+	/** 运行模式. */
+	public final static String Mode = "Mode";
+
+	/** 滤芯1寿命. */
+	public final static String Filter_1_Life = "Filter_1_Life";
 	
-	/** 红色. */
-	public final static String COLOR_RED = "Color_R";
+	/** 滤芯2寿命. */
+	public final static String Filter_2_Life = "Filter_2_Life";
 	
-	/** 绿色. */
-	public final static String COLOR_GREEN = "Color_G";
+	/** 滤芯3寿命. */
+	public final static String Filter_3_Life = "Filter_3_Life";
 	
-	/** 蓝色. */
-	public final static String COLOR_BLUE = "Color_B";
+	/** 滤芯4寿命. */
+	public final static String Filter_4_Life = "Filter_4_Life";
 	
-	/** 色温. */
-	public final static String COLOR_TEMPERATURE = "C_Temperature";
-	
-	/** 选择调节模式. */
-	public final static String MODE = "mode";
-	
+	/** 滤芯5寿命. */
+	public final static String Filter_5_Life = "Filter_5_Life";
 }

@@ -27,7 +27,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.gizwits.framework.entity.DeviceAlarm;
-import com.gizwits.light.R;
+import com.gizwits.waterpurifier.R;
 
 // TODO: Auto-generated Javadoc
 /**
