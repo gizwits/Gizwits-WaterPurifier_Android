@@ -251,9 +251,8 @@ public class MainControlActivity extends BaseActivity implements
 							Integer.parseInt(statuMap.get(JsonKeys.Filter_3_Life).toString()),
 							Integer.parseInt(statuMap.get(JsonKeys.Filter_4_Life).toString()),
 							Integer.parseInt(statuMap.get(JsonKeys.Filter_5_Life).toString())};
-					if (selectFilter != 0) {
-						showFilterMsg();
-					}
+					showFilterMsg();
+					updateMainCtrl();
 					if (Integer.parseInt(statuMap.get(JsonKeys.Mode).toString()) == 1) {
 						setClean();
 					}else if(Integer.parseInt(statuMap.get(JsonKeys.Mode).toString()) == 2){
@@ -565,11 +564,20 @@ public class MainControlActivity extends BaseActivity implements
 			}
 			break;
 		case R.id.ivPower:
-			mCenter.cSwitchOn(mXpgWifiDevice, false);
-			updatePowerSwitch(false);
+			mPowerOffDialog = DialogManager.getPowerOffDialog(this, new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					mCenter.cSwitchOn(mXpgWifiDevice, false);
+					updatePowerSwitch(false);
+					dismissFilterMsg();
+					mPowerOffDialog.dismiss();
+				}
+			});
+			mPowerOffDialog.show();
 			break;
 		case R.id.cancel_btn:
-			selectFilter = 0;
 			dismissFilterMsg();
 			break;
 		case R.id.pp_iv:
@@ -720,62 +728,168 @@ public class MainControlActivity extends BaseActivity implements
 		}
 	}
 
+	/**
+	 * 显示Error信息
+	 * @param haveError 是否拥有error
+	 */
 	private void showErrorMsg(boolean haveError){
 		if(haveError){
 			llErrorMsgAlert.setVisibility(View.VISIBLE);
 			ivPower.setVisibility(View.GONE);
 		}else{
 			llErrorMsgAlert.setVisibility(View.GONE);
-			ivPower.setVisibility(View.VISIBLE);
+			if (llPowerOff.getVisibility() == View.GONE) {
+				ivPower.setVisibility(View.VISIBLE);
+			}
 		}
 	}
 	
+	/**
+	 * 显示滤网剩余时间及信息Dialog
+	 */
 	private void showFilterMsg(){
-		llFilterMsg.setVisibility(View.VISIBLE);
+		if (selectFilter != 0) {
+			llFilterMsg.setVisibility(View.VISIBLE);
+		}
+		int time = 0;
+		int[] timecount = new int[]{(FilterLifeList[0]*100)/2880,
+				(FilterLifeList[1]*100)/8640, (FilterLifeList[2]*100)/8640,
+				(FilterLifeList[3]*100)/17280, (FilterLifeList[4]*100)/8640};
 		switch (selectFilter) {
 		case 1:
+			time = timecount[0];
 			type_tv.setText("类型：PP棉");
 			time_tv.setText("时间："+(FilterLifeList[0])+"小时");
+			life_tv.setText("寿命："+time+"%");
 			break;
 		case 2:
+			time = timecount[1];
 			type_tv.setText("类型：活性炭GAC");
 			time_tv.setText("时间："+(FilterLifeList[1])+"小时");
+			life_tv.setText("寿命："+time+"%");
 			break;
 		case 3:
+			time = timecount[2];
 			type_tv.setText("类型：活性炭CTO");
 			time_tv.setText("时间："+(FilterLifeList[2])+"小时");
+			life_tv.setText("寿命："+time+"%");
 			break;
 		case 4:
+			time = timecount[3];
 			type_tv.setText("类型：RO膜");
 			time_tv.setText("时间："+(FilterLifeList[3])+"小时");
+			life_tv.setText("寿命："+time+"%");
 			break;
 		case 5:
+			time = timecount[4];
 			type_tv.setText("类型：活性炭T33");
 			time_tv.setText("时间："+(FilterLifeList[4])+"小时");
+			life_tv.setText("寿命："+time+"%");
 			break;
+		}
+		if (time < 10) {
+			state_tv.setText("需要更换");
+			state_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_red));
+		}else{
+			state_tv.setText("正常");
+			state_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_black));
 		}
 	}
 	
+	/**
+	 * 更新主界面滤网状态
+	 */
+	private void updateMainCtrl(){
+		int[] timecount = new int[]{(FilterLifeList[0]*100)/2880,
+				(FilterLifeList[1]*100)/8640, (FilterLifeList[2]*100)/8640,
+				(FilterLifeList[3]*100)/17280, (FilterLifeList[4]*100)/8640};
+		filter_tv.setText("运行良好");
+		filter_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_black));
+		for (int i = 0; i < timecount.length; i++) {
+			if (timecount[i] < 10) {
+				filter_tv.setText("需要更换");
+				filter_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_red));
+				switch (i) {
+				case 0:
+					pp_iv.setImageResource(R.drawable.failed_pp);
+					break;
+				case 1:
+					gac_iv.setImageResource(R.drawable.failed_gac);
+					break;
+				case 2:
+					cto_iv.setImageResource(R.drawable.failed_cto);
+					break;
+				case 3:
+					ro_iv.setImageResource(R.drawable.failed_ro);
+					break;
+				case 4:
+					tc_iv.setImageResource(R.drawable.failed_t33);
+					break;
+				}
+			}else{
+				switch (i) {
+				case 0:
+					pp_iv.setImageResource(R.drawable.normal_pp);
+					break;
+				case 1:
+					gac_iv.setImageResource(R.drawable.normal_gac);
+					break;
+				case 2:
+					cto_iv.setImageResource(R.drawable.normal_cto);
+					break;
+				case 3:
+					ro_iv.setImageResource(R.drawable.normal_ro);
+					break;
+				case 4:
+					tc_iv.setImageResource(R.drawable.normal_t33);
+					break;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 隐藏滤网信息界面
+	 */
 	private void dismissFilterMsg(){
+		selectFilter = 0;
 		llFilterMsg.setVisibility(View.GONE);
 	}
 	
+	/**
+	 * 切换正在净水状态
+	 */
 	private void setFilterClean(){
+		reset_btn.setBackgroundResource(R.drawable.button_disable);
+		reset_btn.setOnClickListener(null);
 		purifier_btn.setBackgroundResource(R.drawable.button_disable);
 		clean_btn.setBackgroundResource(R.drawable.button_filter_clean);
 		device_tv.setText("正在净水中");
+		device_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_blue));
 	}
 	
+	/**
+	 * 切换正在冲洗状态
+	 */
 	private void setClean(){
+		reset_btn.setBackgroundResource(R.drawable.button_disable);
+		reset_btn.setOnClickListener(null);
 		clean_btn.setBackgroundResource(R.drawable.button_disable);
 		purifier_btn.setBackgroundResource(R.drawable.button_clean);
 		device_tv.setText("正在冲洗中");
+		device_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_blue));
 	}
 	
+	/**
+	 * 设备模式恢复
+	 */
 	private void setNormal(){
+		reset_btn.setBackgroundResource(R.drawable.button_clean);
+		reset_btn.setOnClickListener(this);
 		purifier_btn.setBackgroundResource(R.drawable.button_clean);
 		clean_btn.setBackgroundResource(R.drawable.button_filter_clean);
 		device_tv.setText("运行良好");
+		device_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_black));
 	}
 	// ==================================================================================
 
