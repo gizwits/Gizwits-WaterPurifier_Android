@@ -104,6 +104,7 @@ public class MainControlActivity extends BaseActivity implements
 	private Button purifier_btn;
 	private Button clean_btn;
 	private Button reset_btn;
+	private Button btn_call;
 
 	private LinearLayout rlPowerOn;
 	private RelativeLayout llFilterMsg;
@@ -418,6 +419,7 @@ public class MainControlActivity extends BaseActivity implements
 		powerOffBtn = (ImageView) findViewById(R.id.powerOffBtn);
 		reset_btn = (Button) findViewById(R.id.reset_btn);
 		cancel_btn = (ImageView) findViewById(R.id.cancel_btn);
+		btn_call = (Button) findViewById(R.id.btn_call);
 
 		rlPowerOn = (LinearLayout) findViewById(R.id.rlPowerOn);
 		llFilterMsg = (RelativeLayout) findViewById(R.id.llFilterMsg);
@@ -491,6 +493,7 @@ public class MainControlActivity extends BaseActivity implements
 		powerOffBtn.setOnClickListener(this);
 		reset_btn.setOnClickListener(this);
 		cancel_btn.setOnClickListener(this);
+		btn_call.setOnClickListener(this);
 		rlPowerOn.setOnClickListener(null);
 		llFilterMsg.setOnClickListener(null);
 		llErrorMsgAlert.setOnClickListener(null);
@@ -562,6 +565,10 @@ public class MainControlActivity extends BaseActivity implements
 				mCenter.cSetLife5(mXpgWifiDevice, 8640);
 				break;
 			}
+			break;
+		case R.id.btn_call:
+            Intent intent = new Intent(Intent.ACTION_CALL,Uri.parse("tel:"+10086));  
+            startActivity(intent);  
 			break;
 		case R.id.ivPower:
 			mPowerOffDialog = DialogManager.getPowerOffDialog(this, new OnClickListener() {
@@ -787,7 +794,7 @@ public class MainControlActivity extends BaseActivity implements
 			life_tv.setText("寿命："+time+"%");
 			break;
 		}
-		if (time < 10) {
+		if (time <= 10) {
 			state_tv.setText("需要更换");
 			state_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_red));
 		}else{
@@ -806,7 +813,7 @@ public class MainControlActivity extends BaseActivity implements
 		filter_tv.setText("运行良好");
 		filter_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_black));
 		for (int i = 0; i < timecount.length; i++) {
-			if (timecount[i] < 10) {
+			if (timecount[i] <= 10) {
 				filter_tv.setText("需要更换");
 				filter_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_red));
 				switch (i) {

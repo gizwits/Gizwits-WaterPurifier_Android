@@ -259,7 +259,7 @@ public final class CaptureActivity extends BaseActivity implements
 	public void handleDecode(Result rawResult, Bundle bundle) {
 		String text = rawResult.getText();
 		Log.i("test", text);
-		if (text.contains("product_key=") & text.contains("did=")
+		if (text.contains("product_key=") && text.contains("did=")
 				&& text.contains("passcode=")) {
 
 			inactivityTimer.onActivity();
