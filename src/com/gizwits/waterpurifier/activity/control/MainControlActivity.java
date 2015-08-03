@@ -579,7 +579,6 @@ public class MainControlActivity extends BaseActivity implements
 					mCenter.cSwitchOn(mXpgWifiDevice, false);
 					updatePowerSwitch(false);
 					dismissFilterMsg();
-					mPowerOffDialog.dismiss();
 				}
 			});
 			mPowerOffDialog.show();
@@ -729,6 +728,8 @@ public class MainControlActivity extends BaseActivity implements
 			rlPowerOn.setVisibility(View.VISIBLE);
 			ivPower.setVisibility(View.VISIBLE);
 		} else {// 关机
+			DialogManager.dismissDialog(MainControlActivity.this,
+					mPowerOffDialog);
 			llPowerOff.setVisibility(View.VISIBLE);
 			rlPowerOn.setVisibility(View.GONE);
 			ivPower.setVisibility(View.GONE);
