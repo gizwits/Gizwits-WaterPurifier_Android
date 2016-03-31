@@ -3,6 +3,7 @@ package com.gizwits.framework.adapter;
 import java.util.List;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -118,7 +119,7 @@ public class MenuDeviceAdapter extends BaseAdapter {
 			holder.device_checked_tv.setVisibility(View.INVISIBLE);
 			;
 		}
-
+		Log.i("Apptest",name+", "+device.isOnline());
 		if (device.isOnline())
 			holder.deviceName_tv.setTextColor(ctx.getResources().getColor(
 					R.color.text_green_blue));
