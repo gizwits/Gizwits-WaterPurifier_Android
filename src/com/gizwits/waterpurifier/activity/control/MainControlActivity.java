@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -55,6 +55,7 @@ import com.gizwits.framework.config.JsonKeys;
 import com.gizwits.framework.entity.DeviceAlarm;
 import com.gizwits.framework.utils.DensityUtil;
 import com.gizwits.framework.utils.DialogManager;
+import com.gizwits.framework.widget.AboutVersionActivity;
 import com.gizwits.framework.widget.SlidingMenu;
 import com.gizwits.framework.widget.SlidingMenu.SlidingMenuListener;
 import com.gizwits.waterpurifier.R;
@@ -70,8 +71,7 @@ import com.xtremeprog.xpgconnect.XPGWifiDevice;
  * 
  * @author Lien
  */
-public class MainControlActivity extends BaseActivity implements
-		OnClickListener, SlidingMenuListener {
+public class MainControlActivity extends BaseActivity implements OnClickListener, SlidingMenuListener {
 
 	/** The tag. */
 	private final String TAG = "MainControlActivity";
@@ -81,11 +81,11 @@ public class MainControlActivity extends BaseActivity implements
 
 	/** The iv menu. */
 	private ImageView ivMenu;
-	
+
 	/** The iv power. */
 	private ImageView ivPower;
-	
-	//==================控制组件====================
+
+	// ==================控制组件====================
 	private ImageView pp_iv;
 	private ImageView gac_iv;
 	private ImageView cto_iv;
@@ -93,14 +93,14 @@ public class MainControlActivity extends BaseActivity implements
 	private ImageView tc_iv;
 	private ImageView powerOffBtn;
 	private ImageView cancel_btn;
-	
+
 	private TextView filter_tv;
 	private TextView device_tv;
 	private TextView type_tv;
 	private TextView time_tv;
 	private TextView life_tv;
 	private TextView state_tv;
-	
+
 	private Button purifier_btn;
 	private Button clean_btn;
 	private Button reset_btn;
@@ -110,13 +110,13 @@ public class MainControlActivity extends BaseActivity implements
 	private RelativeLayout llFilterMsg;
 	private LinearLayout llErrorMsgAlert;
 	private LinearLayout llPowerOff;
-	
-	//=============================================
-	
-	//====================逻辑控制===================
+
+	// =============================================
+
+	// ====================逻辑控制===================
 	private int selectFilter = 0;
 	private int[] FilterLifeList = new int[5];
-	//=============================================
+	// =============================================
 
 	/** The m adapter. */
 	private MenuDeviceAdapter mAdapter;
@@ -209,79 +209,81 @@ public class MainControlActivity extends BaseActivity implements
 	/**
 	 * The handler.
 	 */
+	@SuppressLint("HandlerLeak")
 	Handler handler = new Handler() {
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
 			handler_key key = handler_key.values()[msg.what];
 			switch (key) {
 			case RECEIVED:
-				try {
-					if (deviceDataMap.get("data") != null) {
-						Log.i("info", (String) deviceDataMap.get("data"));
-						inputDataToMaps(statuMap,
-								(String) deviceDataMap.get("data"));
+				if (deviceDataMap == null) {
+					return;
+				} else {
+					try {
+						if (deviceDataMap.get("data") != null) {
+							Log.i("info", (String) deviceDataMap.get("data"));
+							inputDataToMaps(statuMap, (String) deviceDataMap.get("data"));
 
+						}
+						alarmList.clear();
+						if (deviceDataMap.get("alters") != null) {
+							Log.i("info", "alerts" + (String) deviceDataMap.get("alters"));
+							inputAlarmToList((String) deviceDataMap.get("alters"));
+						}
+						if (deviceDataMap.get("faults") != null) {
+							Log.i("info", "faults" + (String) deviceDataMap.get("faults"));
+							inputAlarmToList((String) deviceDataMap.get("faults"));
+						}
+						// 返回主线程处理P0数据刷新
+						handler.sendEmptyMessage(handler_key.UPDATE_UI.ordinal());
+						handler.sendEmptyMessage(handler_key.ALARM.ordinal());
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					alarmList.clear();
-					if (deviceDataMap.get("alters") != null) {
-						Log.i("info", "alerts"+(String) deviceDataMap.get("alters"));
-						inputAlarmToList((String) deviceDataMap.get("alters"));
-					}
-					if (deviceDataMap.get("faults") != null) {
-						Log.i("info", "faults"+(String) deviceDataMap.get("faults"));
-						inputAlarmToList((String) deviceDataMap.get("faults"));
-					}
-					// 返回主线程处理P0数据刷新
-					handler.sendEmptyMessage(handler_key.UPDATE_UI.ordinal());
-					handler.sendEmptyMessage(handler_key.ALARM.ordinal());
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
+
 			case UPDATE_UI:
 				if (mView.isOpen())
 					break;
 
 				if (statuMap != null && statuMap.size() > 0) {
-					handler.removeMessages(handler_key.GET_STATUE_TIMEOUT
-							.ordinal());
-					
+					handler.removeMessages(handler_key.GET_STATUE_TIMEOUT.ordinal());
+
 					updatePowerSwitch((Boolean) statuMap.get(JsonKeys.ON_OFF));
-					FilterLifeList = new int[]{Integer.parseInt(statuMap.get(JsonKeys.Filter_1_Life).toString()),
+					FilterLifeList = new int[] { Integer.parseInt(statuMap.get(JsonKeys.Filter_1_Life).toString()),
 							Integer.parseInt(statuMap.get(JsonKeys.Filter_2_Life).toString()),
 							Integer.parseInt(statuMap.get(JsonKeys.Filter_3_Life).toString()),
 							Integer.parseInt(statuMap.get(JsonKeys.Filter_4_Life).toString()),
-							Integer.parseInt(statuMap.get(JsonKeys.Filter_5_Life).toString())};
+							Integer.parseInt(statuMap.get(JsonKeys.Filter_5_Life).toString()) };
 					showFilterMsg();
 					updateMainCtrl();
 					if (Integer.parseInt(statuMap.get(JsonKeys.Mode).toString()) == 1) {
 						setClean();
-					}else if(Integer.parseInt(statuMap.get(JsonKeys.Mode).toString()) == 2){
+					} else if (Integer.parseInt(statuMap.get(JsonKeys.Mode).toString()) == 2) {
 						setFilterClean();
-					}else{
+					} else {
 						setNormal();
 					}
-					DialogManager.dismissDialog(MainControlActivity.this,
-							progressDialogRefreshing);
+					DialogManager.dismissDialog(MainControlActivity.this, progressDialogRefreshing);
 				}
 				break;
 			case ALARM:
-				if(alarmList.size() != 0){
+				if (llPowerOff.getVisibility()==View.VISIBLE) {
+					return;
+				}
+				if (alarmList.size() != 0) {
 					showErrorMsg(true);
-				}else{
+				} else {
 					showErrorMsg(false);
 				}
 				break;
 			case DISCONNECTED:
 				if (!mView.isOpen()) {
-					DialogManager.dismissDialog(MainControlActivity.this,
-							progressDialogRefreshing);
-					DialogManager.dismissDialog(MainControlActivity.this,
-							mFaultDialog);
-					DialogManager.dismissDialog(MainControlActivity.this,
-							mPowerOffDialog);
-					DialogManager.showDialog(MainControlActivity.this,
-							mDisconnectDialog);
+					DialogManager.dismissDialog(MainControlActivity.this, progressDialogRefreshing);
+					DialogManager.dismissDialog(MainControlActivity.this, mFaultDialog);
+					DialogManager.dismissDialog(MainControlActivity.this, mPowerOffDialog);
+					DialogManager.showDialog(MainControlActivity.this, mDisconnectDialog);
 				}
 				break;
 			case GET_STATUE:
@@ -348,8 +350,7 @@ public class MainControlActivity extends BaseActivity implements
 		initBindList();
 		mAdapter.setChoosedPos(-1);
 		for (int i = 0; i < bindlist.size(); i++) {
-			if (bindlist.get(i).getDid()
-					.equalsIgnoreCase(mXpgWifiDevice.getDid()))
+			if (bindlist.get(i).getDid().equalsIgnoreCase(mXpgWifiDevice.getDid()))
 				mAdapter.setChoosedPos(i);
 		}
 
@@ -375,8 +376,7 @@ public class MainControlActivity extends BaseActivity implements
 	private void refreshMainControl() {
 		mXpgWifiDevice.setListener(deviceListener);
 		DialogManager.showDialog(this, progressDialogRefreshing);
-		handler.sendEmptyMessageDelayed(
-				handler_key.GET_STATUE_TIMEOUT.ordinal(), GetStatueTimeOut);
+		handler.sendEmptyMessageDelayed(handler_key.GET_STATUE_TIMEOUT.ordinal(), GetStatueTimeOut);
 		handler.sendEmptyMessage(handler_key.GET_STATUE.ordinal());
 	}
 
@@ -399,21 +399,21 @@ public class MainControlActivity extends BaseActivity implements
 		mView = (SlidingMenu) findViewById(R.id.main_layout);
 		ivMenu = (ImageView) findViewById(R.id.ivMenu);
 		ivPower = (ImageView) findViewById(R.id.ivPower);
-		
-		//====================控制组件=========================
+
+		// ====================控制组件=========================
 		pp_iv = (ImageView) findViewById(R.id.pp_iv);
 		gac_iv = (ImageView) findViewById(R.id.gac_iv);
 		cto_iv = (ImageView) findViewById(R.id.cto_iv);
 		ro_iv = (ImageView) findViewById(R.id.ro_iv);
 		tc_iv = (ImageView) findViewById(R.id.tc_iv);
-		
+
 		filter_tv = (TextView) findViewById(R.id.filter_tv);
 		device_tv = (TextView) findViewById(R.id.device_tv);
 		type_tv = (TextView) findViewById(R.id.type_tv);
 		time_tv = (TextView) findViewById(R.id.time_tv);
 		life_tv = (TextView) findViewById(R.id.life_tv);
 		state_tv = (TextView) findViewById(R.id.state_tv);
-		
+
 		purifier_btn = (Button) findViewById(R.id.purifier_btn);
 		clean_btn = (Button) findViewById(R.id.clean_btn);
 		powerOffBtn = (ImageView) findViewById(R.id.powerOffBtn);
@@ -427,29 +427,25 @@ public class MainControlActivity extends BaseActivity implements
 		llErrorMsgAlert = (LinearLayout) findViewById(R.id.llErrorMsgAlert);
 		llErrorMsgAlert.getBackground().setAlpha(188);
 		llPowerOff = (LinearLayout) findViewById(R.id.llPowerOff);
-		//====================================================
+		// ====================================================
 
-		mPowerOffDialog = DialogManager.getPowerOffDialog(this,
-				new OnClickListener() {
+		mPowerOffDialog = DialogManager.getPowerOffDialog(this, new OnClickListener() {
 
-					@Override
-					public void onClick(View arg0) {
-						mCenter.cSwitchOn(mXpgWifiDevice, false);
-						DialogManager.dismissDialog(MainControlActivity.this,
-								mPowerOffDialog);
-					}
-				});
-		mFaultDialog = DialogManager.getDeviceErrirDialog(
-				MainControlActivity.this, "设备故障", new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				mCenter.cSwitchOn(mXpgWifiDevice, false);
+				DialogManager.dismissDialog(MainControlActivity.this, mPowerOffDialog);
+			}
+		});
+		mFaultDialog = DialogManager.getDeviceErrirDialog(MainControlActivity.this, "设备故障", new OnClickListener() {
 
-					@Override
-					public void onClick(View v) {
-						Intent intent = new Intent(Intent.ACTION_CALL, Uri
-								.parse("tel:10086"));
-						startActivity(intent);
-						mFaultDialog.dismiss();
-					}
-				});
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:10086"));
+				startActivity(intent);
+				mFaultDialog.dismiss();
+			}
+		});
 
 		mAdapter = new MenuDeviceAdapter(this, bindlist);
 		lvDevice = (ListView) findViewById(R.id.lvDevice);
@@ -460,18 +456,14 @@ public class MainControlActivity extends BaseActivity implements
 		progressDialogRefreshing.setMessage("正在更新状态,请稍后。");
 		progressDialogRefreshing.setCancelable(false);
 
-		mDisconnectDialog = DialogManager.getDisconnectDialog(this,
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						DialogManager.dismissDialog(MainControlActivity.this,
-								mDisconnectDialog);
-						IntentUtils.getInstance().startActivity(
-								MainControlActivity.this,
-								DeviceListActivity.class);
-						finish();
-					}
-				});
+		mDisconnectDialog = DialogManager.getDisconnectDialog(this, new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				DialogManager.dismissDialog(MainControlActivity.this, mDisconnectDialog);
+				IntentUtils.getInstance().startActivity(MainControlActivity.this, DeviceListActivity.class);
+				finish();
+			}
+		});
 
 	}
 
@@ -481,8 +473,8 @@ public class MainControlActivity extends BaseActivity implements
 	private void initEvents() {
 		ivMenu.setOnClickListener(this);
 		ivPower.setOnClickListener(this);
-		
-		//===
+
+		// ===
 		pp_iv.setOnClickListener(this);
 		gac_iv.setOnClickListener(this);
 		cto_iv.setOnClickListener(this);
@@ -498,12 +490,11 @@ public class MainControlActivity extends BaseActivity implements
 		llFilterMsg.setOnClickListener(null);
 		llErrorMsgAlert.setOnClickListener(null);
 		llPowerOff.setOnClickListener(null);
-		//===
-		
+		// ===
+
 		lvDevice.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				if (!mAdapter.getItem(position).isOnline())
 					return;
 
@@ -567,12 +558,12 @@ public class MainControlActivity extends BaseActivity implements
 			}
 			break;
 		case R.id.btn_call:
-            Intent intent = new Intent(Intent.ACTION_CALL,Uri.parse("tel:"+10086));  
-            startActivity(intent);  
+			Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + 10086));
+			startActivity(intent);
 			break;
 		case R.id.ivPower:
 			mPowerOffDialog = DialogManager.getPowerOffDialog(this, new OnClickListener() {
-				
+
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
@@ -606,7 +597,7 @@ public class MainControlActivity extends BaseActivity implements
 			selectFilter = 5;
 			showFilterMsg();
 			break;
-			
+
 		}
 	}
 
@@ -621,26 +612,24 @@ public class MainControlActivity extends BaseActivity implements
 
 		switch (view.getId()) {
 		case R.id.rlDevice:
-			IntentUtils.getInstance().startActivity(MainControlActivity.this,
-					DeviceManageListActivity.class);
+			IntentUtils.getInstance().startActivity(MainControlActivity.this, DeviceManageListActivity.class);
 			break;
 		case R.id.rlAbout:
-			IntentUtils.getInstance().startActivity(MainControlActivity.this,
-					AboutActivity.class);
+			IntentUtils.getInstance().startActivity(MainControlActivity.this, AboutActivity.class);
+			break;
+		case R.id.rlAbout_Demo:
+			IntentUtils.getInstance().startActivity(MainControlActivity.this, AboutVersionActivity.class);
 			break;
 		case R.id.rlAccount:
-			IntentUtils.getInstance().startActivity(MainControlActivity.this,
-					UserManageActivity.class);
+			IntentUtils.getInstance().startActivity(MainControlActivity.this, UserManageActivity.class);
 			break;
 		case R.id.rlHelp:
-			IntentUtils.getInstance().startActivity(MainControlActivity.this,
-					HelpActivity.class);
+			IntentUtils.getInstance().startActivity(MainControlActivity.this, HelpActivity.class);
 			break;
 		case R.id.btnDeviceList:
 			mCenter.cDisconnect(mXpgWifiDevice);
 			DisconnectOtherDevice();
-			IntentUtils.getInstance().startActivity(MainControlActivity.this,
-					DeviceListActivity.class);
+			IntentUtils.getInstance().startActivity(MainControlActivity.this, DeviceListActivity.class);
 			finish();
 			break;
 		}
@@ -674,8 +663,7 @@ public class MainControlActivity extends BaseActivity implements
 		mXpgWifiDevice.setListener(deviceListener);
 		mXpgWifiDevice.login(setmanager.getUid(), setmanager.getToken());
 		isTimeOut = false;
-		handler.sendEmptyMessageDelayed(handler_key.LOGIN_TIMEOUT.ordinal(),
-				LoginTimeOut);
+		handler.sendEmptyMessageDelayed(handler_key.LOGIN_TIMEOUT.ordinal(), LoginTimeOut);
 	}
 
 	/*
@@ -708,9 +696,7 @@ public class MainControlActivity extends BaseActivity implements
 	 */
 	private void DisconnectOtherDevice() {
 		for (XPGWifiDevice theDevice : bindlist) {
-			if (theDevice.isConnected()
-					&& !theDevice.getDid().equalsIgnoreCase(
-							mXpgWifiDevice.getDid()))
+			if (theDevice.isConnected() && !theDevice.getDid().equalsIgnoreCase(mXpgWifiDevice.getDid()))
 				mCenter.cDisconnect(theDevice);
 		}
 	}
@@ -728,8 +714,7 @@ public class MainControlActivity extends BaseActivity implements
 			rlPowerOn.setVisibility(View.VISIBLE);
 			ivPower.setVisibility(View.VISIBLE);
 		} else {// 关机
-			DialogManager.dismissDialog(MainControlActivity.this,
-					mPowerOffDialog);
+			DialogManager.dismissDialog(MainControlActivity.this, mPowerOffDialog);
 			llPowerOff.setVisibility(View.VISIBLE);
 			rlPowerOn.setVisibility(View.GONE);
 			ivPower.setVisibility(View.GONE);
@@ -738,79 +723,79 @@ public class MainControlActivity extends BaseActivity implements
 
 	/**
 	 * 显示Error信息
-	 * @param haveError 是否拥有error
+	 * 
+	 * @param haveError
+	 *            是否拥有error
 	 */
-	private void showErrorMsg(boolean haveError){
-		if(haveError){
+	private void showErrorMsg(boolean haveError) {
+		if (haveError) {
 			llErrorMsgAlert.setVisibility(View.VISIBLE);
 			ivPower.setVisibility(View.GONE);
-		}else{
+		} else {
 			llErrorMsgAlert.setVisibility(View.GONE);
 			if (llPowerOff.getVisibility() == View.GONE) {
 				ivPower.setVisibility(View.VISIBLE);
 			}
 		}
 	}
-	
+
 	/**
 	 * 显示滤网剩余时间及信息Dialog
 	 */
-	private void showFilterMsg(){
+	private void showFilterMsg() {
 		if (selectFilter != 0) {
 			llFilterMsg.setVisibility(View.VISIBLE);
 		}
 		int time = 0;
-		int[] timecount = new int[]{(FilterLifeList[0]*100)/2880,
-				(FilterLifeList[1]*100)/8640, (FilterLifeList[2]*100)/8640,
-				(FilterLifeList[3]*100)/17280, (FilterLifeList[4]*100)/8640};
+		int[] timecount = new int[] { (FilterLifeList[0] * 100) / 2880, (FilterLifeList[1] * 100) / 8640,
+				(FilterLifeList[2] * 100) / 8640, (FilterLifeList[3] * 100) / 17280, (FilterLifeList[4] * 100) / 8640 };
 		switch (selectFilter) {
 		case 1:
 			time = timecount[0];
 			type_tv.setText("类型：PP棉");
-			time_tv.setText("时间："+(FilterLifeList[0])+"小时");
-			life_tv.setText("寿命："+time+"%");
+			time_tv.setText("时间：" + (FilterLifeList[0]) + "小时");
+			life_tv.setText("寿命：" + time + "%");
 			break;
 		case 2:
 			time = timecount[1];
 			type_tv.setText("类型：活性炭GAC");
-			time_tv.setText("时间："+(FilterLifeList[1])+"小时");
-			life_tv.setText("寿命："+time+"%");
+			time_tv.setText("时间：" + (FilterLifeList[1]) + "小时");
+			life_tv.setText("寿命：" + time + "%");
 			break;
 		case 3:
 			time = timecount[2];
 			type_tv.setText("类型：活性炭CTO");
-			time_tv.setText("时间："+(FilterLifeList[2])+"小时");
-			life_tv.setText("寿命："+time+"%");
+			time_tv.setText("时间：" + (FilterLifeList[2]) + "小时");
+			life_tv.setText("寿命：" + time + "%");
 			break;
 		case 4:
 			time = timecount[3];
 			type_tv.setText("类型：RO膜");
-			time_tv.setText("时间："+(FilterLifeList[3])+"小时");
-			life_tv.setText("寿命："+time+"%");
+			time_tv.setText("时间：" + (FilterLifeList[3]) + "小时");
+			life_tv.setText("寿命：" + time + "%");
 			break;
 		case 5:
 			time = timecount[4];
 			type_tv.setText("类型：活性炭T33");
-			time_tv.setText("时间："+(FilterLifeList[4])+"小时");
-			life_tv.setText("寿命："+time+"%");
+			time_tv.setText("时间：" + (FilterLifeList[4]) + "小时");
+			life_tv.setText("寿命：" + time + "%");
 			break;
 		}
 		if (time <= 10) {
 			state_tv.setText("需要更换");
 			state_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_red));
-		}else{
+		} else {
 			state_tv.setText("正常");
 			state_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_black));
 		}
 	}
-	
+
 	/**
 	 * 更新主界面滤网状态
 	 */
-	private void updateMainCtrl(){
-		int[] timecount = new int[]{(FilterLifeList[0]*100)/2880,
-				(FilterLifeList[1]*100)/8640, (FilterLifeList[2]*100)/8640,
-				(FilterLifeList[3]*100)/17280, (FilterLifeList[4]*100)/8640};
+	private void updateMainCtrl() {
+		int[] timecount = new int[] { (FilterLifeList[0] * 100) / 2880, (FilterLifeList[1] * 100) / 8640,
+				(FilterLifeList[2] * 100) / 8640, (FilterLifeList[3] * 100) / 17280, (FilterLifeList[4] * 100) / 8640 };
 		filter_tv.setText("运行良好");
 		filter_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_black));
 		for (int i = 0; i < timecount.length; i++) {
@@ -834,7 +819,7 @@ public class MainControlActivity extends BaseActivity implements
 					tc_iv.setImageResource(R.drawable.failed_t33);
 					break;
 				}
-			}else{
+			} else {
 				switch (i) {
 				case 0:
 					pp_iv.setImageResource(R.drawable.normal_pp);
@@ -855,19 +840,19 @@ public class MainControlActivity extends BaseActivity implements
 			}
 		}
 	}
-	
+
 	/**
 	 * 隐藏滤网信息界面
 	 */
-	private void dismissFilterMsg(){
+	private void dismissFilterMsg() {
 		selectFilter = 0;
 		llFilterMsg.setVisibility(View.GONE);
 	}
-	
+
 	/**
 	 * 切换正在净水状态
 	 */
-	private void setFilterClean(){
+	private void setFilterClean() {
 		reset_btn.setBackgroundResource(R.drawable.button_disable);
 		reset_btn.setOnClickListener(null);
 		purifier_btn.setBackgroundResource(R.drawable.button_disable);
@@ -875,11 +860,11 @@ public class MainControlActivity extends BaseActivity implements
 		device_tv.setText("正在净水中");
 		device_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_blue));
 	}
-	
+
 	/**
 	 * 切换正在冲洗状态
 	 */
-	private void setClean(){
+	private void setClean() {
 		reset_btn.setBackgroundResource(R.drawable.button_disable);
 		reset_btn.setOnClickListener(null);
 		clean_btn.setBackgroundResource(R.drawable.button_disable);
@@ -887,11 +872,11 @@ public class MainControlActivity extends BaseActivity implements
 		device_tv.setText("正在冲洗中");
 		device_tv.setTextColor(MainControlActivity.this.getResources().getColor(R.color.text_blue));
 	}
-	
+
 	/**
 	 * 设备模式恢复
 	 */
-	private void setNormal(){
+	private void setNormal() {
 		reset_btn.setBackgroundResource(R.drawable.button_clean);
 		reset_btn.setOnClickListener(this);
 		purifier_btn.setBackgroundResource(R.drawable.button_clean);
@@ -904,16 +889,14 @@ public class MainControlActivity extends BaseActivity implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.gizwits.aircondition.activity.BaseActivity#didReceiveData(com.xtremeprog
-	 * .xpgconnect.XPGWifiDevice, java.util.concurrent.ConcurrentHashMap, int)
+	 * @see com.gizwits.aircondition.activity.BaseActivity#didReceiveData(com.
+	 * xtremeprog .xpgconnect.XPGWifiDevice,
+	 * java.util.concurrent.ConcurrentHashMap, int)
 	 */
 	@Override
-	protected void didReceiveData(XPGWifiDevice device,
-			ConcurrentHashMap<String, Object> dataMap, int result) {
+	protected void didReceiveData(XPGWifiDevice device, ConcurrentHashMap<String, Object> dataMap, int result) {
 		if (!device.getDid().equalsIgnoreCase(mXpgWifiDevice.getDid()))
 			return;
-
 		this.deviceDataMap = dataMap;
 		handler.sendEmptyMessage(handler_key.RECEIVED.ordinal());
 	}
@@ -939,9 +922,8 @@ public class MainControlActivity extends BaseActivity implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.gizwits.aircondition.activity.BaseActivity#didDisconnected(com.xtremeprog
-	 * .xpgconnect.XPGWifiDevice)
+	 * @see com.gizwits.aircondition.activity.BaseActivity#didDisconnected(com.
+	 * xtremeprog .xpgconnect.XPGWifiDevice)
 	 */
 	@Override
 	protected void didDisconnected(XPGWifiDevice device) {
@@ -961,8 +943,7 @@ public class MainControlActivity extends BaseActivity implements
 	 * @throws JSONException
 	 *             the JSON exception
 	 */
-	private void inputDataToMaps(ConcurrentHashMap<String, Object> map,
-			String json) throws JSONException {
+	private void inputDataToMaps(ConcurrentHashMap<String, Object> map, String json) throws JSONException {
 		Log.i("revjson", json);
 		JSONObject receive = new JSONObject(json);
 		Iterator actions = receive.keys();
@@ -971,8 +952,7 @@ public class MainControlActivity extends BaseActivity implements
 			String action = actions.next().toString();
 			Log.i("revjson", "action=" + action);
 			// 忽略特殊部分
-			if (action.equals("cmd") || action.equals("qos")
-					|| action.equals("seq") || action.equals("version")) {
+			if (action.equals("cmd") || action.equals("qos") || action.equals("seq") || action.equals("version")) {
 				continue;
 			}
 			JSONObject params = receive.getJSONObject(action);
@@ -987,7 +967,7 @@ public class MainControlActivity extends BaseActivity implements
 		}
 		handler.sendEmptyMessage(handler_key.UPDATE_UI.ordinal());
 	}
-	
+
 	/**
 	 * Input alarm to list.(Show number of Alarm)
 	 * 
@@ -996,7 +976,7 @@ public class MainControlActivity extends BaseActivity implements
 	 * @throws JSONException
 	 *             the JSON exception
 	 */
-	private void inputAlarmToList(String json){
+	private void inputAlarmToList(String json) {
 		Log.i("revjson", json);
 		JSONObject receive;
 		try {
@@ -1005,11 +985,16 @@ public class MainControlActivity extends BaseActivity implements
 			while (actions.hasNext()) {
 				Log.i("revjson", "action");
 				String action = actions.next().toString();
-				DeviceAlarm alarm = new DeviceAlarm(DateUtil.getDateCN(new Date()),
-						action);
-				alarmList.add(alarm);
+				String value = receive.getString(action);
+				DeviceAlarm alarm = new DeviceAlarm(DateUtil.getDateCN(new Date()), action);
+				if (value.equals("1")) {
+					alarmList.add(alarm);
+				}
 			}
-			handler.sendEmptyMessage(handler_key.ALARM.ordinal());
+			if (alarmList.size() != 0) {
+				handler.sendEmptyMessage(handler_key.ALARM.ordinal());
+			}
+
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

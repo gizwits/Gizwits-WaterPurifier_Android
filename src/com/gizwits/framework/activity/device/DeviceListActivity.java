@@ -37,6 +37,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.gizwits.framework.activity.BaseActivity;
 import com.gizwits.framework.activity.account.LoginActivity;
@@ -62,8 +63,7 @@ import com.xtremeprog.xpgconnect.XPGWifiDevice;
  * 
  * @author StephenC
  */
-public class DeviceListActivity extends BaseActivity implements
-		OnClickListener, OnItemClickListener {
+public class DeviceListActivity extends BaseActivity implements OnClickListener, OnItemClickListener {
 
 	/** The Constant TAG. */
 	private static final String TAG = "DeviceListActivity";
@@ -87,7 +87,7 @@ public class DeviceListActivity extends BaseActivity implements
 
 	/** The dialog. */
 	private Dialog dialog;
-	
+
 	/** 登陆设备超时时间 */
 	private int LoginDeviceTimeOut = 60000;
 
@@ -98,7 +98,7 @@ public class DeviceListActivity extends BaseActivity implements
 	 * The boolean isExit.
 	 */
 	private boolean isExit = false;
-	
+
 	/**
 	 * ClassName: Enum handler_key. <br/>
 	 * <br/>
@@ -134,6 +134,11 @@ public class DeviceListActivity extends BaseActivity implements
 		 */
 		EXIT,
 
+		/**
+		 * Toast
+		 */
+		TOAST,
+
 	}
 
 	/** The handler. */
@@ -150,8 +155,7 @@ public class DeviceListActivity extends BaseActivity implements
 
 			case LOGIN_SUCCESS:
 				DialogManager.dismissDialog(DeviceListActivity.this, progressDialog);
-				IntentUtils.getInstance().startActivity(
-						DeviceListActivity.this, MainControlActivity.class);
+				IntentUtils.getInstance().startActivity(DeviceListActivity.this, MainControlActivity.class);
 				break;
 
 			case LOGIN_FAIL:
@@ -165,7 +169,11 @@ public class DeviceListActivity extends BaseActivity implements
 			case EXIT:
 				isExit = false;
 				break;
+			case TOAST:
+				Toast.makeText(DeviceListActivity.this, msg.obj+"", Toast.LENGTH_LONG).show();
+				break;
 			}
+
 			deviceListAdapter.changeDatas(deviceslist);
 		}
 
@@ -185,8 +193,7 @@ public class DeviceListActivity extends BaseActivity implements
 		initEvents();
 		if (getIntent() != null) {
 			if (getIntent().getBooleanExtra("autoLogin", false)) {
-				mCenter.cLogin(setmanager.getUserName(),
-						setmanager.getPassword());
+				mCenter.cLogin(setmanager.getUserName(), setmanager.getPassword());
 			}
 		}
 	}
@@ -200,12 +207,11 @@ public class DeviceListActivity extends BaseActivity implements
 	public void onResume() {
 		super.onResume();
 		deviceListAdapter.changeDatas(new ArrayList<XPGWifiDevice>());
-		
+
 		if (getIntent().getBooleanExtra("isbind", false)) {
 
-			mCenter.cBindDevice(setmanager.getUid(), setmanager.getToken(),
-					getIntent().getStringExtra("did"), getIntent()
-							.getStringExtra("passcode"), "");
+			mCenter.cBindDevice(setmanager.getUid(), setmanager.getToken(), getIntent().getStringExtra("did"),
+					getIntent().getStringExtra("passcode"), "");
 		} else {
 			getList();
 		}
@@ -264,31 +270,25 @@ public class DeviceListActivity extends BaseActivity implements
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.ivAdd:
-			IntentUtils.getInstance().startActivity(DeviceListActivity.this,
-					SearchDeviceActivity.class);
+			IntentUtils.getInstance().startActivity(DeviceListActivity.this, SearchDeviceActivity.class);
 			break;
 		case R.id.ivLogout:
 			if (dialog == null) {
-				dialog = DialogManager.getLogoutDialog(DeviceListActivity.this,
-						new OnClickListener() {
+				dialog = DialogManager.getLogoutDialog(DeviceListActivity.this, new OnClickListener() {
 
-							@Override
-							public void onClick(View v) {
-								setmanager.setToken("");
-								setmanager.setUserName("");
-								setmanager.setPassword("");
-								setmanager.setUid("");
-								
-								DialogManager.dismissDialog(
-										DeviceListActivity.this, dialog);
-								ToastUtils.showShort(DeviceListActivity.this,
-										"注销成功");
-								IntentUtils.getInstance().startActivity(
-										DeviceListActivity.this,
-										LoginActivity.class);
-								finish();
-							}
-						});
+					@Override
+					public void onClick(View v) {
+						setmanager.setToken("");
+						setmanager.setUserName("");
+						setmanager.setPassword("");
+						setmanager.setUid("");
+
+						DialogManager.dismissDialog(DeviceListActivity.this, dialog);
+						ToastUtils.showShort(DeviceListActivity.this, "注销成功");
+						IntentUtils.getInstance().startActivity(DeviceListActivity.this, LoginActivity.class);
+						finish();
+					}
+				});
 			}
 
 			DialogManager.showDialog(DeviceListActivity.this, dialog);
@@ -305,31 +305,22 @@ public class DeviceListActivity extends BaseActivity implements
 	 * .AdapterView, android.view.View, int, long)
 	 */
 	@Override
-	public void onItemClick(AdapterView<?> parent, View view, int position,
-			long id) {
-		XPGWifiDevice tempDevice = deviceListAdapter
-				.getDeviceByPosition(position);
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		XPGWifiDevice tempDevice = deviceListAdapter.getDeviceByPosition(position);
 		if (tempDevice == null) {
 			return;
 		}
 		if (tempDevice.isLAN()) {
 			if (tempDevice.isBind(setmanager.getUid())) {
 				// TODO 登陆设备
-				Log.i(TAG,
-						"本地登陆设备:mac=" + tempDevice.getPasscode() + ";ip="
-								+ tempDevice.getIPAddress() + ";did="
-								+ tempDevice.getDid() + ";passcode="
-								+ tempDevice.getPasscode());
+				Log.i(TAG, "本地登陆设备:mac=" + tempDevice.getPasscode() + ";ip=" + tempDevice.getIPAddress() + ";did="
+						+ tempDevice.getDid() + ";passcode=" + tempDevice.getPasscode());
 				loginDevice(tempDevice);
 			} else {
 				// TODO 未设备
-				Log.i(TAG,
-						"绑定设备:mac=" + tempDevice.getMacAddress() + ";ip="
-								+ tempDevice.getIPAddress() + ";did="
-								+ tempDevice.getDid() + ";passcode="
-								+ tempDevice.getPasscode());
-				Intent intent = new Intent(DeviceListActivity.this,
-						BindingDeviceActivity.class);
+				Log.i(TAG, "绑定设备:mac=" + tempDevice.getMacAddress() + ";ip=" + tempDevice.getIPAddress() + ";did="
+						+ tempDevice.getDid() + ";passcode=" + tempDevice.getPasscode());
+				Intent intent = new Intent(DeviceListActivity.this, BindingDeviceActivity.class);
 				intent.putExtra("mac", tempDevice.getMacAddress());
 				intent.putExtra("did", tempDevice.getDid());
 				startActivity(intent);
@@ -337,18 +328,12 @@ public class DeviceListActivity extends BaseActivity implements
 		} else {
 			if (!tempDevice.isOnline()) {
 				// TODO 离线
-				Log.i(TAG,
-						"离线设备:mac=" + tempDevice.getPasscode() + ";ip="
-								+ tempDevice.getIPAddress() + ";did="
-								+ tempDevice.getDid() + ";passcode="
-								+ tempDevice.getPasscode());
+				Log.i(TAG, "离线设备:mac=" + tempDevice.getPasscode() + ";ip=" + tempDevice.getIPAddress() + ";did="
+						+ tempDevice.getDid() + ";passcode=" + tempDevice.getPasscode());
 			} else {
 				// TODO 登陆设备
-				Log.i(TAG,
-						"远程登陆设备:mac=" + tempDevice.getPasscode() + ";ip="
-								+ tempDevice.getIPAddress() + ";did="
-								+ tempDevice.getDid() + ";passcode="
-								+ tempDevice.getPasscode());
+				Log.i(TAG, "远程登陆设备:mac=" + tempDevice.getPasscode() + ";ip=" + tempDevice.getIPAddress() + ";did="
+						+ tempDevice.getDid() + ";passcode=" + tempDevice.getPasscode());
 				loginDevice(tempDevice);
 			}
 		}
@@ -365,9 +350,9 @@ public class DeviceListActivity extends BaseActivity implements
 		DialogManager.showDialog(DeviceListActivity.this, progressDialog);
 		mXpgWifiDevice = xpgWifiDevice;
 		mXpgWifiDevice.setListener(deviceListener);
-		if(mXpgWifiDevice.isConnected()){
+		if (mXpgWifiDevice.isConnected()) {
 			handler.sendEmptyMessage(handler_key.LOGIN_SUCCESS.ordinal());
-		}else{
+		} else {
 			handler.sendEmptyMessageDelayed(handler_key.LOGIN_TIMEOUT.ordinal(), LoginDeviceTimeOut);
 			mXpgWifiDevice.login(setmanager.getUid(), setmanager.getToken());
 		}
@@ -412,6 +397,12 @@ public class DeviceListActivity extends BaseActivity implements
 	protected void didDiscovered(int error, List<XPGWifiDevice> deviceList) {
 		deviceslist = deviceList;
 		handler.sendEmptyMessage(handler_key.FOUND.ordinal());
+		if (error == -27) {
+			Message msg=new Message();
+			msg.obj="网络异常";
+			msg.what=handler_key.TOAST.ordinal();
+			handler.sendMessage(msg);
+		}
 	}
 
 	@Override
@@ -428,8 +419,7 @@ public class DeviceListActivity extends BaseActivity implements
 	 * java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	protected void didUserLogin(int error, String errorMessage, String uid,
-			String token) {
+	protected void didUserLogin(int error, String errorMessage, String uid, String token) {
 		if (!uid.isEmpty() && !token.isEmpty()) {// 登陆成功
 			setmanager.setUid(uid);
 			setmanager.setToken(token);
@@ -470,8 +460,7 @@ public class DeviceListActivity extends BaseActivity implements
 		 */
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent
-					.getAction())) {
+			if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
 				getList();
 			}
 		}

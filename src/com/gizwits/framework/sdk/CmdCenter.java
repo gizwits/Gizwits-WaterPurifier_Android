@@ -17,6 +17,8 @@
  */
 package com.gizwits.framework.sdk;
 
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,19 +31,19 @@ import com.gizwits.framework.config.JsonKeys;
 import com.xtremeprog.xpgconnect.XPGWifiDevice;
 import com.xtremeprog.xpgconnect.XPGWifiSDK;
 import com.xtremeprog.xpgconnect.XPGWifiSDK.XPGWifiConfigureMode;
+import com.xtremeprog.xpgconnect.XPGWifiSDK.XPGWifiGAgentType;
 
 // TODO: Auto-generated Javadoc
 
 /**
  * ClassName: Class CmdCenter. <br/>
- * 控制指令类
- * <br/>
+ * 控制指令类 <br/>
  * date: 2014-12-15 12:09:02 <br/>
  * 
  * @author Lien
  */
 public class CmdCenter {
-	
+
 	/** The Constant TAG. */
 	private static final String TAG = "CmdCenter";
 
@@ -131,8 +133,10 @@ public class CmdCenter {
 	/**
 	 * C register mail user.
 	 *
-	 * @param mailAddr the mail addr
-	 * @param password the password
+	 * @param mailAddr
+	 *            the mail addr
+	 * @param password
+	 *            the password
 	 */
 	public void cRegisterMailUser(String mailAddr, String password) {
 		xpgWifiGCC.registerUserByEmail(mailAddr, password);
@@ -177,8 +181,7 @@ public class CmdCenter {
 	 * @param newPassword
 	 *            the new password
 	 */
-	public void cChangeUserPasswordWithCode(String phone, String code,
-			String newPassword) {
+	public void cChangeUserPasswordWithCode(String phone, String code, String newPassword) {
 		xpgWifiGCC.changeUserPasswordByCode(phone, code, newPassword);
 	}
 
@@ -199,7 +202,8 @@ public class CmdCenter {
 	/**
 	 * 根据邮箱修改密码.
 	 *
-	 * @param email            邮箱地址
+	 * @param email
+	 *            邮箱地址
 	 */
 	public void cChangePassworfByEmail(String email) {
 		xpgWifiGCC.changeUserPasswordByEmail(email);
@@ -211,8 +215,10 @@ public class CmdCenter {
 	 * @param phone
 	 *            手机号
 	 */
-	public void cRequestSendVerifyCode(String phone) {
-		xpgWifiGCC.requestSendVerifyCode(phone);
+	public void cRequestSendVerifyCode(String token, String captchaId,
+			String captchaCode, String phone) {
+		//xpgWifiGCC.requestSendVerifyCode(phone);
+		xpgWifiGCC.requestSendPhoneSMSCode(token, captchaId, captchaCode, phone);
 	}
 
 	/**
@@ -223,9 +229,8 @@ public class CmdCenter {
 	 * @param password
 	 *            wifi密码
 	 */
-	public void cSetAirLink(String wifi, String password) {
-		xpgWifiGCC.setDeviceWifi(wifi, password,
-				XPGWifiConfigureMode.XPGWifiConfigureModeAirLink, 60);
+	public void cSetAirLink(String wifi, String password, List<XPGWifiGAgentType> types) {
+		xpgWifiGCC.setDeviceWifi(wifi, password, XPGWifiConfigureMode.XPGWifiConfigureModeAirLink, null, 60, types);
 	}
 
 	/**
@@ -236,9 +241,8 @@ public class CmdCenter {
 	 * @param password
 	 *            wifi密码
 	 */
-	public void cSetSoftAp(String wifi, String password) {
-		xpgWifiGCC.setDeviceWifi(wifi, password,
-				XPGWifiConfigureMode.XPGWifiConfigureModeSoftAP, 30);
+	public void cSetSoftAp(String wifi, String password, String ssidAP) {
+		xpgWifiGCC.setDeviceWifi(wifi, password, XPGWifiConfigureMode.XPGWifiConfigureModeSoftAP, ssidAP, 60, null);
 	}
 
 	/**
@@ -268,8 +272,7 @@ public class CmdCenter {
 	 * @param remark
 	 *            备注
 	 */
-	public void cBindDevice(String uid, String token, String did,
-			String passcode, String remark) {
+	public void cBindDevice(String uid, String token, String did, String passcode, String remark) {
 
 		xpgWifiGCC.bindDevice(uid, token, did, passcode, remark);
 	}
@@ -283,9 +286,12 @@ public class CmdCenter {
 	/**
 	 * 发送指令.
 	 *
-	 * @param xpgWifiDevice            the xpg wifi device
-	 * @param key the key
-	 * @param value the value
+	 * @param xpgWifiDevice
+	 *            the xpg wifi device
+	 * @param key
+	 *            the key
+	 * @param value
+	 *            the value
 	 */
 	public void cWrite(XPGWifiDevice xpgWifiDevice, String key, Object value) {
 
@@ -306,7 +312,8 @@ public class CmdCenter {
 	/**
 	 * 获取设备状态.
 	 *
-	 * @param xpgWifiDevice            the xpg wifi device
+	 * @param xpgWifiDevice
+	 *            the xpg wifi device
 	 */
 	public void cGetStatus(XPGWifiDevice xpgWifiDevice) {
 		JSONObject json = new JSONObject();
@@ -340,8 +347,7 @@ public class CmdCenter {
 	 * @param passCode
 	 *            the pass code
 	 */
-	public void cUnbindDevice(String uid, String token, String did,
-			String passCode) {
+	public void cUnbindDevice(String uid, String token, String did, String passCode) {
 		xpgWifiGCC.unbindDevice(uid, token, did, passCode);
 	}
 
@@ -359,8 +365,7 @@ public class CmdCenter {
 	 * @param remark
 	 *            the remark
 	 */
-	public void cUpdateRemark(String uid, String token, String did,
-			String passCode, String remark) {
+	public void cUpdateRemark(String uid, String token, String did, String passCode, String remark) {
 		xpgWifiGCC.bindDevice(uid, token, did, passCode, remark);
 	}
 
@@ -372,80 +377,92 @@ public class CmdCenter {
 	/**
 	 * C switch on.
 	 *
-	 * @param xpgWifiDevice the xpg wifi device
-	 * @param isOn the is on
+	 * @param xpgWifiDevice
+	 *            the xpg wifi device
+	 * @param isOn
+	 *            the is on
 	 */
 	public void cSwitchOn(XPGWifiDevice xpgWifiDevice, boolean isOn) {
 		cWrite(xpgWifiDevice, JsonKeys.ON_OFF, isOn);
 		cGetStatus(xpgWifiDevice);
 	}
-	
+
 	/**
 	 * C Mode.
 	 *
-	 * @param xpgWifiDevice the xpg wifi device
-	 * @param int mode
+	 * @param xpgWifiDevice
+	 *            the xpg wifi device
+	 * @param int
+	 *            mode
 	 */
 	public void cSetMode(XPGWifiDevice xpgWifiDevice, int mode) {
 		cWrite(xpgWifiDevice, JsonKeys.Mode, mode);
 		cGetStatus(xpgWifiDevice);
 	}
-	
+
 	/**
 	 * C set life 1.
 	 *
-	 * @param xpgWifiDevice the xpg wifi device
-	 * @param int life
+	 * @param xpgWifiDevice
+	 *            the xpg wifi device
+	 * @param int
+	 *            life
 	 */
 	public void cSetLife1(XPGWifiDevice xpgWifiDevice, int life) {
 		cWrite(xpgWifiDevice, JsonKeys.Filter_1_Life, life);
 		cGetStatus(xpgWifiDevice);
 	}
-	
+
 	/**
 	 * C set life 2.
 	 *
-	 * @param xpgWifiDevice the xpg wifi device
-	 * @param int life
+	 * @param xpgWifiDevice
+	 *            the xpg wifi device
+	 * @param int
+	 *            life
 	 */
 	public void cSetLife2(XPGWifiDevice xpgWifiDevice, int life) {
 		cWrite(xpgWifiDevice, JsonKeys.Filter_2_Life, life);
 		cGetStatus(xpgWifiDevice);
 	}
-	
+
 	/**
 	 * C set life 3.
 	 *
-	 * @param xpgWifiDevice the xpg wifi device
-	 * @param int life
+	 * @param xpgWifiDevice
+	 *            the xpg wifi device
+	 * @param int
+	 *            life
 	 */
 	public void cSetLife3(XPGWifiDevice xpgWifiDevice, int life) {
 		cWrite(xpgWifiDevice, JsonKeys.Filter_3_Life, life);
 		cGetStatus(xpgWifiDevice);
 	}
-	
+
 	/**
 	 * C set life 4.
 	 *
-	 * @param xpgWifiDevice the xpg wifi device
-	 * @param int life
+	 * @param xpgWifiDevice
+	 *            the xpg wifi device
+	 * @param int
+	 *            life
 	 */
 	public void cSetLife4(XPGWifiDevice xpgWifiDevice, int life) {
 		cWrite(xpgWifiDevice, JsonKeys.Filter_4_Life, life);
 		cGetStatus(xpgWifiDevice);
 	}
-	
+
 	/**
 	 * C set life 5.
 	 *
-	 * @param xpgWifiDevice the xpg wifi device
-	 * @param int life
+	 * @param xpgWifiDevice
+	 *            the xpg wifi device
+	 * @param int
+	 *            life
 	 */
 	public void cSetLife5(XPGWifiDevice xpgWifiDevice, int life) {
 		cWrite(xpgWifiDevice, JsonKeys.Filter_5_Life, life);
 		cGetStatus(xpgWifiDevice);
 	}
-	
-	
-	
+
 }
